@@ -477,6 +477,7 @@ struct ftrace_likely_data {
 	(sizeof(t) == sizeof(char) || sizeof(t) == sizeof(short) || \
 	 sizeof(t) == sizeof(int) || sizeof(t) == sizeof(long))
 
+#if !defined(CONFIG_CC_OPTIMIZE_FOR_DEBUGGING)
 #ifdef __OPTIMIZE__
 # define __compiletime_assert(condition, msg, prefix, suffix)		\
 	do {								\
@@ -491,6 +492,9 @@ struct ftrace_likely_data {
 			prefix ## suffix();				\
 	} while (0)
 #else
+# define __compiletime_assert(condition, msg, prefix, suffix) do { } while (0)
+#endif
+# else
 # define __compiletime_assert(condition, msg, prefix, suffix) do { } while (0)
 #endif
 

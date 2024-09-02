@@ -743,6 +743,12 @@ CFLAGS_GCOV	+= -fno-tree-loop-im
 endif
 export CFLAGS_GCOV
 
+ifdef CONFIG_NO_AUTO_INLINE
+KBUILD_CFLAGS   += $(call cc-option, -fno-inline-functions) \
+          $(call cc-option, -fno-inline-small-functions) \
+          $(call cc-option, -fno-inline-functions-called-once)
+endif
+
 # The arch Makefiles can override CC_FLAGS_FTRACE. We may also append it later.
 ifdef CONFIG_FUNCTION_TRACER
   CC_FLAGS_FTRACE := -pg
@@ -799,12 +805,21 @@ endif # need-config
 
 KBUILD_CFLAGS	+= -fno-delete-null-pointer-checks
 
+ifdef CONFIG_CC_OPTIMIZE_FOR_DEBUGGING
+KBUILD_CFLAGS  += $(call cc-option, -Og)
+KBUILD_CFLAGS  += $(call cc-option, -Wno-unused-variable)
+KBUILD_CFLAGS   += $(call cc-disable-warning,maybe-uninitialized,)
+KBUILD_CFLAGS   += $(call cc-disable-warning,unused-function,)
+else
 ifdef CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE
 KBUILD_CFLAGS += -O2
 KBUILD_RUSTFLAGS += -Copt-level=2
-else ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
+else
+ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS += -Os
 KBUILD_RUSTFLAGS += -Copt-level=s
+endif
+endif
 endif
 
 # Always set `debug-assertions` and `overflow-checks` because their default
